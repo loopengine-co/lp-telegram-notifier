@@ -34,10 +34,14 @@ A Telegram bot token, from [@BotFather](https://t.me/botfather) —
 message it on Telegram, run `/newbot`, and follow the prompts. The
 token looks like `123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ`.
 
-- `TELEGRAM_BOT_TOKEN` (secret).
+- `TELEGRAM_BOT_TOKEN` (secret, **set per agent**) — each agent that
+  installs this ability needs its own bot. There is no shared value to
+  fall back to: an agent without its own token fails with a clear
+  "not set for agent" error rather than posting as another agent's bot.
 - `TELEGRAM_DEFAULT_CHAT_ID` — a numeric chat/group/channel id (e.g.
   `"-1001234567890"`) or a public channel username (e.g.
-  `"@mychannel"`) to send to when a call doesn't specify one.
+  `"@mychannel"`) to send to when a call doesn't specify one. Shared
+  by default; any agent can set its own.
 
 **For a private chat, the target user must have already started a
 conversation with the bot** (sent it `/start`) — Telegram doesn't let a
@@ -48,20 +52,17 @@ post) — add it the same way you'd add a human member.
 No npm dependency needed — a single `fetch()` call against Telegram's
 own Bot API, no SDK.
 
-### Different default chat per agent
+### Per-agent settings
 
-Installed under more than one agent, and each one should default to a
-different chat? Set `<AGENT_NAME>_TELEGRAM_DEFAULT_CHAT_ID` (e.g.
-`SUPPORT_TELEGRAM_DEFAULT_CHAT_ID` for an agent named `support`,
-`SALES_TELEGRAM_DEFAULT_CHAT_ID` for one named `sales`) instead of — or
-alongside — the shared `TELEGRAM_DEFAULT_CHAT_ID`. Each agent's own
-installed copy of `send_telegram_message` checks its own override
-first, and only falls back to the shared `TELEGRAM_DEFAULT_CHAT_ID`
-when its own isn't set — so agents that don't need a different chat
-can just leave it unset and keep using the shared one. The Admin UI's
-Environment tab shows this per-agent override as its own row, right
-alongside the shared default, for whichever agent's Environment tab
-you're viewing.
+Set both in each agent's own Environment tab in the Admin UI (stored in
+`agents/<name>/.env`). `TELEGRAM_BOT_TOKEN` only has a per-agent row.
+`TELEGRAM_DEFAULT_CHAT_ID` has a shared row plus a per-agent row; an
+agent that leaves its own unset uses the shared one.
+
+Upgrading from 1.x: a shared `TELEGRAM_BOT_TOKEN` is no longer used.
+Set the token on each agent. Overrides set the old way
+(`<AGENT_NAME>_TELEGRAM_DEFAULT_CHAT_ID`) still work until you replace
+them.
 
 ## Install
 
@@ -69,8 +70,8 @@ you're viewing.
 npx loopengine add-ability lp-telegram-notifier --agent <your-agent>
 ```
 
-Then set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_DEFAULT_CHAT_ID` (see
-"Auth" above). No `npm install` step — this ability has no
+Then set `TELEGRAM_BOT_TOKEN` on that agent, and
+`TELEGRAM_DEFAULT_CHAT_ID` shared or per agent (see "Auth" above). No `npm install` step — this ability has no
 dependencies of its own.
 
 ## Upgrading

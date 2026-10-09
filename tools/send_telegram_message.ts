@@ -1,4 +1,3 @@
-import { agentScopedEnvVarName, inferAgentNameFromToolUrl } from 'loopengine'
 import type { ToolDefinition } from 'loopengine'
 
 // Telegram's own sendMessage carries a real HTTP status matching the
@@ -8,22 +7,11 @@ import type { ToolDefinition } from 'loopengine'
 // body's own `ok` field regardless (Telegram's own documented
 // contract: the response always carries a boolean `ok`), since that is
 // what actually carries `description` on failure.
-function requireEnv(name: string, action: string): string {
-  const value = process.env[name]
-  if (!value) throw new Error(`${action}: ${name} must be set`)
-  return value
-}
-
-// Resolved once at module load, same as lp-slack-notifier's own
-// post_to_slack — there's exactly one .env/process.env for the whole
-// project (see loopengine's own env-admin.ts), so two agents both
-// installing this ability and relying on the bare
-// TELEGRAM_DEFAULT_CHAT_ID would otherwise always message the same
-// chat. undefined when this file isn't actually at the expected
-// agents/<name>/tools/ depth (a test harness loading it from
-// elsewhere) — the fallback chain below just skips the per-agent
-// override entirely in that case.
-const AGENT_NAME = inferAgentNameFromToolUrl(import.meta.url)
+//
+// Settings come from ctx.env, not process.env: loopengine resolves them
+// per agent (see loopengine.ability.json's `scope`). TELEGRAM_BOT_TOKEN
+// is agent-scoped, so each agent sends as its own bot and never borrows
+// another's; TELEGRAM_DEFAULT_CHAT_ID falls back to the shared value.
 
 export const sendTelegramMessage: ToolDefinition = {
   name: 'send_telegram_message',
@@ -39,7 +27,7 @@ export const sendTelegramMessage: ToolDefinition = {
       chat_id: {
         type: 'string',
         description:
-          'Optional — a numeric chat/group/channel id (e.g. "-1001234567890") or a public channel username (e.g. "@mychannel") to send to instead of this agent\'s own default chat (its own <AGENT_NAME>_TELEGRAM_DEFAULT_CHAT_ID override if set, else the shared TELEGRAM_DEFAULT_CHAT_ID).',
+          'Optional — a numeric chat/group/channel id (e.g. "-1001234567890") or a public channel username (e.g. "@mychannel") to send to instead of this agent\'s own default chat (TELEGRAM_DEFAULT_CHAT_ID).',
       },
       parse_mode: {
         type: 'string',
@@ -50,17 +38,14 @@ export const sendTelegramMessage: ToolDefinition = {
     },
     required: ['text'],
   },
-  execute: async (input) => {
+  execute: async (input, ctx) => {
     const text = String(input.text ?? '')
     if (!text) throw new Error('send_telegram_message: text is required')
 
-    const token = requireEnv('TELEGRAM_BOT_TOKEN', 'send_telegram_message')
-    const scopedChatId = AGENT_NAME ? process.env[agentScopedEnvVarName(AGENT_NAME, 'TELEGRAM_DEFAULT_CHAT_ID')] : undefined
-    const chatId = (typeof input.chat_id === 'string' && input.chat_id ? input.chat_id : undefined) ?? scopedChatId ?? process.env.TELEGRAM_DEFAULT_CHAT_ID
+    const token = ctx.env.require('TELEGRAM_BOT_TOKEN')
+    const chatId = (typeof input.chat_id === 'string' && input.chat_id ? input.chat_id : undefined) ?? ctx.env.get('TELEGRAM_DEFAULT_CHAT_ID')
     if (!chatId) {
-      throw new Error(
-        `send_telegram_message: no chat_id given, and neither ${AGENT_NAME ? `${agentScopedEnvVarName(AGENT_NAME, 'TELEGRAM_DEFAULT_CHAT_ID')} nor ` : ''}TELEGRAM_DEFAULT_CHAT_ID is set`,
-      )
+      throw new Error(`send_telegram_message: no chat_id given, and TELEGRAM_DEFAULT_CHAT_ID is not set for agent '${ctx.agentName}'`)
     }
 
     const payload: Record<string, unknown> = { chat_id: chatId, text }

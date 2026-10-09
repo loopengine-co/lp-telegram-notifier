@@ -1,10 +1,10 @@
 {
-  "loopengineVersion": "^0.1.60",
+  "loopengineVersion": "^0.1.62",
   "tools": ["tools/send_telegram_message.ts"],
   "skills": ["skills/telegram-notifying"],
   "actauth": "actauth/rules.yml",
   "env": [
-    { "name": "TELEGRAM_BOT_TOKEN", "description": "A Telegram bot token from @BotFather (looks like \"123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\") — message @BotFather on Telegram and run /newbot to create one.", "secret": true },
-    { "name": "TELEGRAM_DEFAULT_CHAT_ID", "description": "A numeric chat/group/channel id (e.g. \"-1001234567890\" for a group/channel, a positive number for a private chat) or a public channel username (e.g. \"@mychannel\") to send to when a call doesn't specify one explicitly. For a private chat, the target user must have already started a conversation with the bot (sent /start) — a bot cannot message a user cold. For a group or channel, the bot must already be a member (and, for a channel, usually an admin able to post). If this ability is installed under more than one agent and they should default to different chats, set <AGENT_NAME>_TELEGRAM_DEFAULT_CHAT_ID instead (e.g. SUPPORT_TELEGRAM_DEFAULT_CHAT_ID for an agent named 'support') — that agent's own copy of send_telegram_message checks its own override first and only falls back to this shared value when its override isn't set.", "secret": false, "perAgent": true }
+    { "name": "TELEGRAM_BOT_TOKEN", "description": "A Telegram bot token from @BotFather (looks like \"123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\") — message @BotFather on Telegram and run /newbot to create one. Set per agent: each agent that installs this ability needs its own bot, so two agents never post as the same bot or compete for its updates.", "secret": true, "scope": "agent" },
+    { "name": "TELEGRAM_DEFAULT_CHAT_ID", "description": "A numeric chat/group/channel id (e.g. \"-1001234567890\" for a group/channel, a positive number for a private chat) or a public channel username (e.g. \"@mychannel\") to send to when a call doesn't specify one explicitly. For a private chat, the target user must have already started a conversation with the bot (sent /start) — a bot cannot message a user cold. For a group or channel, the bot must already be a member (and, for a channel, usually an admin able to post). An agent can set its own value in its Environment tab; an agent that doesn't uses the shared one.", "secret": false, "scope": "overridable" }
   ]
 }

@@ -47,9 +47,8 @@ own job (see HUMAN_IN_THE_LOOP.md), not this tool.
 
 ## Chat id and failures
 
-Omit `chat_id` to use this agent's own default — its own
-`<AGENT_NAME>_TELEGRAM_DEFAULT_CHAT_ID` override if one is set for it,
-else the shared `TELEGRAM_DEFAULT_CHAT_ID` — and pass one explicitly
+Omit `chat_id` to use this agent's own default chat
+(`TELEGRAM_DEFAULT_CHAT_ID`) — and pass one explicitly
 only when a specific call genuinely belongs somewhere else. A failure
 here almost always means one of: the bot token is wrong, the target
 chat doesn't exist, a private-chat target has never started a
