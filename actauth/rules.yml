@@ -1,0 +1,14 @@
+# decision: allow — sending a message to a Telegram chat/group/channel
+# is visible to whoever is in it, but unlike lp-x-poster's own
+# x_create_post/x_reply, it's not public, permanent, or attributed
+# under some external account's own name; a message can be deleted,
+# and the audience is whoever the operator already added the bot for.
+# Tighten this to ask for a deployment where the configured chat is
+# itself sensitive (a customer-facing or wide-audience channel, say) —
+# the right call depends entirely on which chat
+# TELEGRAM_DEFAULT_CHAT_ID actually points at, which this ability has
+# no way to judge on its own.
+- name: send-telegram-message-allowed
+  scope: "*/*"
+  tool: send_telegram_message
+  decision: allow
