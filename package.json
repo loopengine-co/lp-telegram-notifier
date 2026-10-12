@@ -1,6 +1,6 @@
 {
   "name": "lp-telegram-notifier",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A loopengine ability: a send_telegram_message tool that sends a plain message to a Telegram chat, group, or channel from a configured bot — relaying a summary, finding, or notification somewhere a human will see it, independent of actauth's own approval-notification mechanism — plus a skill on how to use it.",
   "license": "MIT",
   "keywords": ["loopengine", "loopengine-ability", "telegram", "notification"],
